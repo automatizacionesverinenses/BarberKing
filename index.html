@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BarberKing — Barbería Premium | Reserva tu Cita</title>
+  <meta name="description" content="BarberKing es la barbería premium donde el estilo se encuentra con la tradición. Reserva tu cita online y disfruta de una experiencia de grooming única.">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ====== HEADER ====== -->
+  <header class="header" id="header">
+    <div class="header-inner">
+      <a href="#" class="logo">
+        <span class="logo-icon">✂</span>
+        <span>BarberKing</span>
+      </a>
+      <nav class="nav-links" id="nav-links">
+        <a href="#services-section">Servicios</a>
+        <a href="#booking-section">Reservar</a>
+        <a href="admin.html">Panel Barbero</a>
+        <a href="#booking-section" class="nav-cta">Reservar Cita</a>
+      </nav>
+      <div class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ====== HERO ====== -->
+  <section class="hero" id="hero">
+    <div class="hero-bg">
+      <img src="img/hero.png" alt="Interior premium de barbería BarberKing">
+    </div>
+    <div class="hero-content">
+      <p class="hero-label">Barbería Premium desde 2018</p>
+      <h1 class="hero-title">
+        Donde el Estilo<br>
+        se encuentra con la<br>
+        <span class="gold">Tradición</span>
+      </h1>
+      <p class="hero-description">
+        Experimenta el arte del grooming masculino en un ambiente exclusivo. 
+        Cada corte es una obra maestra personalizada.
+      </p>
+      <div class="hero-actions">
+        <a href="#booking-section" class="btn btn-primary" id="hero-cta">
+          <span class="btn-icon">📅</span>
+          Reservar Ahora
+        </a>
+        <a href="#services-section" class="btn btn-outline">
+          Ver Servicios
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-number">5K+</div>
+          <div class="stat-label">Clientes satisfechos</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">8</div>
+          <div class="stat-label">Años de experiencia</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">4.9</div>
+          <div class="stat-label">Valoración media</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== SERVICES ====== -->
+  <section class="services" id="services-section">
+    <div class="container">
+      <div class="services-header">
+        <p class="section-label">Nuestros Servicios</p>
+        <h2 class="section-title">Elige tu Servicio</h2>
+        <div class="gold-line"></div>
+        <p class="section-subtitle">Selecciona el servicio que deseas para continuar con tu reserva</p>
+      </div>
+      <div class="services-grid" id="services-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== BOOKING ====== -->
+  <section class="booking" id="booking-section">
+    <div class="container">
+      <div class="booking-container">
+        <!-- Booking Header with Steps -->
+        <div class="booking-header">
+          <p class="section-label">Reserva Online</p>
+          <h2 class="section-title">Reserva tu Cita</h2>
+          <div class="booking-steps" id="booking-steps">
+            <div class="step active" data-step="1">
+              <span class="step-number">1</span>
+              Servicio
+            </div>
+            <div class="step" data-step="2">
+              <span class="step-number">2</span>
+              Fecha y Hora
+            </div>
+            <div class="step" data-step="3">
+              <span class="step-number">3</span>
+              Tus Datos
+            </div>
+            <div class="step" data-step="4">
+              <span class="step-number">4</span>
+              Confirmación
+            </div>
+          </div>
+        </div>
+
+        <!-- Booking Body -->
+        <div class="booking-body">
+          <!-- Step 1: Service Selection -->
+          <div class="step-panel active" id="step-1">
+            <p style="color: var(--color-text-secondary); margin-bottom: var(--space-lg);">
+              Selecciona un servicio de la sección superior o elige uno aquí:
+            </p>
+            <div class="services-grid" id="booking-services-grid">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Step 2: Date & Time -->
+          <div class="step-panel" id="step-2">
+            <div class="datetime-grid">
+              <div class="calendar-section">
+                <h3>📅 Selecciona una Fecha</h3>
+                <div class="calendar-nav">
+                  <button id="prev-month" aria-label="Mes anterior">◀</button>
+                  <span class="calendar-month" id="calendar-month-label"></span>
+                  <button id="next-month" aria-label="Mes siguiente">▶</button>
+                </div>
+                <div class="calendar-weekdays">
+                  <span>Lun</span>
+                  <span>Mar</span>
+                  <span>Mié</span>
+                  <span>Jue</span>
+                  <span>Vie</span>
+                  <span>Sáb</span>
+                  <span>Dom</span>
+                </div>
+                <div class="calendar-days" id="calendar-days">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+              <div class="time-section">
+                <h3>🕐 Selecciona una Hora</h3>
+                <div class="time-slots" id="time-slots">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Contact Info -->
+          <div class="step-panel" id="step-3">
+            <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: var(--space-xl);">
+              📋 Completa tus Datos
+            </h3>
+            <form id="booking-form" class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="client-name">Nombre *</label>
+                <input type="text" class="form-input" id="client-name" placeholder="Tu nombre" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="client-surname">Apellido *</label>
+                <input type="text" class="form-input" id="client-surname" placeholder="Tu apellido" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="client-phone">Teléfono *</label>
+                <input type="tel" class="form-input" id="client-phone" placeholder="+34 612 345 678" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="client-email">Email</label>
+                <input type="email" class="form-input" id="client-email" placeholder="tu@email.com">
+              </div>
+              <div class="form-group full-width">
+                <label class="form-label" for="client-notes">Notas adicionales</label>
+                <textarea class="form-input" id="client-notes" placeholder="¿Alguna preferencia o petición especial?"></textarea>
+              </div>
+            </form>
+          </div>
+
+          <!-- Step 4: Confirmation -->
+          <div class="step-panel" id="step-4">
+            <div class="confirmation-panel">
+              <div class="confirmation-icon">✅</div>
+              <h3 class="confirmation-title">¡Cita Reservada!</h3>
+              <p class="confirmation-text">
+                Tu cita ha sido registrada correctamente. El barbero recibirá tu solicitud 
+                y podrás ver el estado de tu reserva. ¡Te esperamos!
+              </p>
+              <div class="booking-summary" id="booking-summary">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Booking Footer -->
+        <div class="booking-footer" id="booking-footer">
+          <button class="btn btn-outline" id="btn-prev" style="visibility: hidden;">
+            ← Anterior
+          </button>
+          <button class="btn btn-primary" id="btn-next">
+            Siguiente →
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== FOOTER ====== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <p class="footer-text">© 2026 BarberKing — Todos los derechos reservados</p>
+        <div class="footer-links">
+          <a href="#">Privacidad</a>
+          <a href="#">Términos</a>
+          <a href="admin.html">Panel Barbero</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
