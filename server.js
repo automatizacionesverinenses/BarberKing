@@ -157,6 +157,19 @@ async function initDB() {
 }
 initDB();
 
+// ====== HEALTH CHECK (Ping) ======
+// Endpoint to keep Render and Supabase awake (prevent free tier pausing)
+app.get('/api/health', async (req, res) => {
+  try {
+    // Perform a lightweight query to Supabase to reset the 7-day inactivity timer
+    await pool.query('SELECT 1');
+    res.status(200).json({ status: 'ok', message: 'Render and Supabase are awake' });
+  } catch (error) {
+    console.error('Health check database error:', error);
+    res.status(500).json({ status: 'error', message: 'Database connection failed' });
+  }
+});
+
 // ====== SERVER-SENT EVENTS (SSE) ======
 let sseClients = [];
 function sendSSEEvent(eventType, data) {
