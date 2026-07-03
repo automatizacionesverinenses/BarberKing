@@ -13,6 +13,27 @@ const API_BASE = window.location.origin + '/api';
 // INITIALIZATION
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
+  // Check auth
+  const token = localStorage.getItem('bk_token');
+  const userStr = localStorage.getItem('bk_user');
+  if (!token || !userStr) {
+    window.location.href = 'login.html';
+    return;
+  }
+  
+  try {
+    const user = JSON.parse(userStr);
+    if (user.role !== 'admin' && user.role !== 'employee') {
+      window.location.href = 'index.html';
+      return;
+    }
+    document.querySelector('.admin-sidebar p:nth-child(2)').textContent = `${user.name} ${user.surname}`;
+    document.querySelector('.admin-sidebar p:nth-child(3)').textContent = user.role === 'admin' ? 'Administrador' : 'Empleado';
+  } catch(e) {
+    window.location.href = 'login.html';
+    return;
+  }
+
   renderAdminDate();
   loadStats();
   loadAppointments();
@@ -100,7 +121,16 @@ function playNotificationSound() {
 // ============================================
 async function loadStats() {
   try {
-    const response = await fetch(`${API_BASE}/stats`);
+    const token = localStorage.getItem('bk_token');
+    const response = await fetch(`${API_BASE}/stats`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    if (response.status === 401 || response.status === 403) {
+      window.location.href = 'login.html';
+      return;
+    }
+    
     const result = await response.json();
 
     if (result.success) {
@@ -153,7 +183,16 @@ async function loadAppointments(filter = currentFilter) {
       url += `?status=${filter}`;
     }
 
-    const response = await fetch(url);
+    const token = localStorage.getItem('bk_token');
+    const response = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    if (response.status === 401 || response.status === 403) {
+      window.location.href = 'login.html';
+      return;
+    }
+    
     const result = await response.json();
 
     if (!result.success) {
@@ -260,9 +299,13 @@ async function handleAction(action, appointmentId) {
 
 async function updateStatus(id, newStatus) {
   try {
+    const token = localStorage.getItem('bk_token');
     const response = await fetch(`${API_BASE}/appointments/${id}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify({ status: newStatus })
     });
 
@@ -284,7 +327,10 @@ async function updateStatus(id, newStatus) {
 
 async function showDetails(id) {
   try {
-    const response = await fetch(`${API_BASE}/appointments/${id}`);
+    const token = localStorage.getItem('bk_token');
+    const response = await fetch(`${API_BASE}/appointments/${id}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
     const result = await response.json();
 
     if (!result.success) {

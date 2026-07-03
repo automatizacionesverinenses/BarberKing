@@ -16,9 +16,12 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const Database = require('better-sqlite3');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'barberking_super_secret_key_123';
 
 // ============================================
 // MIDDLEWARE
@@ -40,8 +43,20 @@ db.pragma('journal_mode = WAL');
 
 // Create tables
 db.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role TEXT DEFAULT 'client' CHECK(role IN ('client', 'employee', 'admin')),
+    name TEXT NOT NULL,
+    surname TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now', 'localtime'))
+  );
+
   CREATE TABLE IF NOT EXISTS appointments (
     id TEXT PRIMARY KEY,
+    user_id TEXT,
     service_id TEXT NOT NULL,
     service_name TEXT NOT NULL,
     service_icon TEXT DEFAULT '',
@@ -56,12 +71,25 @@ db.exec(`
     client_notes TEXT DEFAULT '',
     status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'confirmed', 'cancelled')),
     created_at TEXT DEFAULT (datetime('now', 'localtime')),
-    updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+    updated_at TEXT DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (user_id) REFERENCES users(id)
   );
 
   CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(date);
   CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);
+  CREATE INDEX IF NOT EXISTS idx_appointments_user_id ON appointments(user_id);
 `);
+
+// Create default admin user if none exists
+const adminExists = db.prepare("SELECT * FROM users WHERE role = 'admin'").get();
+if (!adminExists) {
+  const adminPassword = bcrypt.hashSync('admin123', 10);
+  db.prepare(`
+    INSERT INTO users (id, email, password_hash, role, name, surname, phone)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run('user_admin_001', 'admin@barberking.com', adminPassword, 'admin', 'Carlos', 'Martínez', '600000000');
+  console.log('✅ Creada cuenta de Admin por defecto (admin@barberking.com / admin123)');
+}
 
 console.log('✅ Base de datos SQLite inicializada');
 
@@ -108,12 +136,101 @@ app.get('/api/events', (req, res) => {
 });
 
 // ============================================
+// AUTHENTICATION MIDDLEWARES
+// ============================================
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+  if (!token) return res.status(401).json({ success: false, error: 'Acceso denegado. Token no proporcionado.' });
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ success: false, error: 'Token inválido o expirado.' });
+    req.user = user;
+    next();
+  });
+}
+
+function requireAdminOrEmployee(req, res, next) {
+  if (req.user && (req.user.role === 'admin' || req.user.role === 'employee')) {
+    next();
+  } else {
+    res.status(403).json({ success: false, error: 'No tienes permisos para realizar esta acción.' });
+  }
+}
+
+// ============================================
 // API ROUTES
 // ============================================
 
+// --- AUTH ROUTES ---
+app.post('/api/auth/register', (req, res) => {
+  try {
+    const { email, password, name, surname, phone } = req.body;
+    
+    if (!email || !password || !name || !surname || !phone) {
+      return res.status(400).json({ success: false, error: 'Todos los campos son obligatorios' });
+    }
+
+    const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+    if (existingUser) {
+      return res.status(409).json({ success: false, error: 'El email ya está registrado' });
+    }
+
+    const password_hash = bcrypt.hashSync(password, 10);
+    const id = 'user_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 7);
+
+    db.prepare(`
+      INSERT INTO users (id, email, password_hash, role, name, surname, phone)
+      VALUES (?, ?, ?, 'client', ?, ?, ?)
+    `).run(id, email, password_hash, name, surname, phone);
+
+    const token = jwt.sign({ id, email, role: 'client', name, surname }, JWT_SECRET, { expiresIn: '7d' });
+    
+    res.status(201).json({ success: true, token, user: { id, email, role: 'client', name, surname, phone } });
+  } catch (err) {
+    console.error('Error en registro:', err);
+    res.status(500).json({ success: false, error: 'Error interno del servidor' });
+  }
+});
+
+app.post('/api/auth/login', (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ success: false, error: 'Email y contraseña requeridos' });
+
+    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+    if (!user) return res.status(401).json({ success: false, error: 'Credenciales inválidas' });
+
+    const validPassword = bcrypt.compareSync(password, user.password_hash);
+    if (!validPassword) return res.status(401).json({ success: false, error: 'Credenciales inválidas' });
+
+    const token = jwt.sign({ id: user.id, email: user.email, role: user.role, name: user.name, surname: user.surname }, JWT_SECRET, { expiresIn: '7d' });
+    
+    res.json({ 
+      success: true, 
+      token, 
+      user: { id: user.id, email: user.email, role: user.role, name: user.name, surname: user.surname, phone: user.phone } 
+    });
+  } catch (err) {
+    console.error('Error en login:', err);
+    res.status(500).json({ success: false, error: 'Error interno del servidor' });
+  }
+});
+
+app.get('/api/auth/me', authenticateToken, (req, res) => {
+  try {
+    const user = db.prepare('SELECT id, email, role, name, surname, phone, created_at FROM users WHERE id = ?').get(req.user.id);
+    if (!user) return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
+    res.json({ success: true, user });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Error interno del servidor' });
+  }
+});
+
 // --- GET /api/appointments ---
 // Query params: ?status=pending|confirmed|cancelled  &date=YYYY-MM-DD
-app.get('/api/appointments', (req, res) => {
+app.get('/api/appointments', authenticateToken, requireAdminOrEmployee, (req, res) => {
   try {
     let query = 'SELECT * FROM appointments';
     const conditions = [];
@@ -148,7 +265,7 @@ app.get('/api/appointments', (req, res) => {
 });
 
 // --- GET /api/appointments/:id ---
-app.get('/api/appointments/:id', (req, res) => {
+app.get('/api/appointments/:id', authenticateToken, requireAdminOrEmployee, (req, res) => {
   try {
     const row = db.prepare('SELECT * FROM appointments WHERE id = ?').get(req.params.id);
     if (!row) {
@@ -162,7 +279,7 @@ app.get('/api/appointments/:id', (req, res) => {
 });
 
 // --- POST /api/appointments ---
-app.post('/api/appointments', (req, res) => {
+app.post('/api/appointments', authenticateToken, (req, res) => {
   try {
     const { service, date, time, client } = req.body;
 
@@ -196,14 +313,15 @@ app.post('/api/appointments', (req, res) => {
 
     const stmt = db.prepare(`
       INSERT INTO appointments 
-        (id, service_id, service_name, service_icon, service_price, service_duration,
+        (id, user_id, service_id, service_name, service_icon, service_price, service_duration,
          date, time, client_name, client_surname, client_phone, client_email, client_notes,
          status, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
     `);
 
     stmt.run(
       id,
+      req.user.id,
       service.id,
       service.name,
       service.icon || '',
@@ -240,7 +358,7 @@ app.post('/api/appointments', (req, res) => {
 });
 
 // --- PATCH /api/appointments/:id ---
-app.patch('/api/appointments/:id', (req, res) => {
+app.patch('/api/appointments/:id', authenticateToken, requireAdminOrEmployee, (req, res) => {
   try {
     const { status } = req.body;
     const validStatuses = ['pending', 'confirmed', 'cancelled'];
@@ -282,7 +400,7 @@ app.patch('/api/appointments/:id', (req, res) => {
 });
 
 // --- DELETE /api/appointments/:id ---
-app.delete('/api/appointments/:id', (req, res) => {
+app.delete('/api/appointments/:id', authenticateToken, requireAdminOrEmployee, (req, res) => {
   try {
     const existing = db.prepare('SELECT * FROM appointments WHERE id = ?').get(req.params.id);
     if (!existing) {
@@ -301,7 +419,7 @@ app.delete('/api/appointments/:id', (req, res) => {
 });
 
 // --- GET /api/stats ---
-app.get('/api/stats', (req, res) => {
+app.get('/api/stats', authenticateToken, requireAdminOrEmployee, (req, res) => {
   try {
     const today = new Date().toISOString().split('T')[0];
 

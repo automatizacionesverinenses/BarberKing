@@ -16,11 +16,10 @@
         <span class="logo-icon">✂</span>
         <span>BarberKing</span>
       </a>
-      <nav class="nav-links" id="nav-links">
-        <a href="#services-section">Servicios</a>
-        <a href="#booking-section">Reservar</a>
-        <a href="admin.html">Panel Barbero</a>
-        <a href="#booking-section" class="nav-cta">Reservar Cita</a>
+      <nav class="main-nav">
+        <a href="#services-section" class="nav-link">Servicios</a>
+        <a href="#booking-section" class="nav-link">Reservar Cita</a>
+        <a href="login.html" class="nav-link" id="nav-login">Iniciar Sesión</a>
       </nav>
       <div class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
         <span></span>
@@ -159,34 +158,44 @@
             </div>
           </div>
 
-          <!-- Step 3: Contact Info -->
-          <div class="step-panel" id="step-3">
-            <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: var(--space-xl);">
-              📋 Completa tus Datos
-            </h3>
-            <form id="booking-form" class="form-grid">
-              <div class="form-group">
-                <label class="form-label" for="client-name">Nombre *</label>
-                <input type="text" class="form-input" id="client-name" placeholder="Tu nombre" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="client-surname">Apellido *</label>
-                <input type="text" class="form-input" id="client-surname" placeholder="Tu apellido" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="client-phone">Teléfono *</label>
-                <input type="tel" class="form-input" id="client-phone" placeholder="+34 612 345 678" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="client-email">Email</label>
-                <input type="email" class="form-input" id="client-email" placeholder="tu@email.com">
-              </div>
-              <div class="form-group full-width">
-                <label class="form-label" for="client-notes">Notas adicionales</label>
-                <textarea class="form-input" id="client-notes" placeholder="¿Alguna preferencia o petición especial?"></textarea>
-              </div>
-            </form>
+          <!-- STEP 3: CLIENT DETAILS (Only shown if logged in) -->
+        <div class="booking-step" id="step-3" style="display: none;">
+          <h3 style="margin-bottom: var(--space-md);">Tus Datos (Sesión Iniciada)</h3>
+          
+          <div id="auth-warning" style="display: none; text-align: center; margin-bottom: var(--space-lg);">
+            <p style="color: var(--color-text-secondary); margin-bottom: var(--space-sm);">Para finalizar tu reserva, necesitas iniciar sesión o crear una cuenta gratuita.</p>
+            <a href="login.html" class="btn btn-primary" style="display: inline-block;">Iniciar Sesión / Registrarse</a>
           </div>
+
+          <div id="booking-client-form">
+            <div style="display: flex; gap: var(--space-sm); margin-bottom: var(--space-sm);">
+              <div style="flex: 1;">
+                <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Nombre *</label>
+                <input type="text" id="client-name" readonly required style="width: 100%; padding: var(--space-sm); border: 1px solid var(--color-border); background: rgba(255,255,255,0.05); color: var(--color-text); border-radius: var(--radius-sm);">
+              </div>
+              <div style="flex: 1;">
+                <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Apellidos *</label>
+                <input type="text" id="client-surname" readonly required style="width: 100%; padding: var(--space-sm); border: 1px solid var(--color-border); background: rgba(255,255,255,0.05); color: var(--color-text); border-radius: var(--radius-sm);">
+              </div>
+            </div>
+
+            <div style="margin-bottom: var(--space-sm);">
+              <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Teléfono *</label>
+              <input type="tel" id="client-phone" readonly required style="width: 100%; padding: var(--space-sm); border: 1px solid var(--color-border); background: rgba(255,255,255,0.05); color: var(--color-text); border-radius: var(--radius-sm);">
+            </div>
+            
+            <div style="margin-bottom: var(--space-md);">
+              <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Notas para el barbero (Opcional)</label>
+              <textarea id="client-notes" rows="2" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--color-border); background: transparent; color: var(--color-text); border-radius: var(--radius-sm); font-family: inherit;"></textarea>
+            </div>
+            
+            <div class="booking-summary" id="booking-summary">
+              <!-- Summary injected by JS -->
+            </div>
+
+            <button class="btn btn-primary" id="btn-confirm-booking" style="width: 100%; margin-top: var(--space-md);">Confirmar Reserva</button>
+          </div>
+        </div>
 
           <!-- Step 4: Confirmation -->
           <div class="step-panel" id="step-4">
