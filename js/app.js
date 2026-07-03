@@ -117,6 +117,30 @@ function setupNavbarAuth() {
       const iconSvg = '<svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>';
       navLogin.innerHTML = iconSvg + ' ' + ((user.role === 'admin' || user.role === 'employee') ? 'Panel Barbero' : 'Mi Perfil');
       navLogin.href = (user.role === 'admin' || user.role === 'employee') ? 'admin.html' : '#';
+
+      // Add logout button if it doesn't exist
+      if (!document.getElementById('nav-logout')) {
+        const navLinks = document.getElementById('nav-links');
+        const logoutBtn = document.createElement('a');
+        logoutBtn.href = '#';
+        logoutBtn.id = 'nav-logout';
+        logoutBtn.innerHTML = '🚪 Salir';
+        logoutBtn.style.color = 'var(--color-accent-warning)';
+        
+        logoutBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          localStorage.removeItem('bk_token');
+          localStorage.removeItem('bk_user');
+          window.location.reload();
+        });
+        
+        const navCta = document.querySelector('.nav-cta');
+        if (navCta) {
+          navLinks.insertBefore(logoutBtn, navCta);
+        } else {
+          navLinks.appendChild(logoutBtn);
+        }
+      }
     } catch (e) {
       console.error(e);
     }
