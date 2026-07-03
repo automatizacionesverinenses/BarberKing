@@ -8,6 +8,23 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>B</text></svg>">
   <link rel="stylesheet" href="css/styles.css">
 </head>
+<script>
+  // Prevents "Flash of Unstyled Content" for unauthorized users
+  const token = localStorage.getItem('bk_token');
+  const userStr = localStorage.getItem('bk_user');
+  if (!token || !userStr) {
+    window.location.replace('login.html');
+  } else {
+    try {
+      const user = JSON.parse(userStr);
+      if (user.role !== 'admin' && user.role !== 'employee') {
+        window.location.replace('index.html');
+      }
+    } catch (e) {
+      window.location.replace('login.html');
+    }
+  }
+</script>
 <body>
 
   <div class="admin-layout">
