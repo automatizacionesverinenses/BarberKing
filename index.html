@@ -18,6 +18,8 @@
         <span>BarberKing</span>
       </a>
       <nav class="nav-links" id="nav-links">
+        <a href="#about-section">Nosotros</a>
+        <a href="#team-section">El Equipo</a>
         <a href="#booking-section">Reservar</a>
         <a href="login.html" id="nav-login" style="display: flex; align-items: center; gap: 5px;">
           <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
@@ -72,7 +74,73 @@
     </div>
   </section>
 
+  <!-- ====== NOSOTROS (ABOUT) ====== -->
+  <section class="about-section" id="about-section">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-text">
+          <p class="section-label">Nuestra Filosofía</p>
+          <h2 class="section-title">El Arte del Grooming Masculino</h2>
+          <div class="gold-line"></div>
+          <p>
+            En BarberKing no solo cortamos el pelo, esculpimos tu identidad. Desde 2018 nos hemos consolidado como un refugio de estilo y tradición en el corazón de la ciudad. Nuestro local está diseñado para ofrecerte una experiencia de relajación absoluta, combinando técnicas clásicas de barbería con las últimas tendencias de diseño capilar.
+          </p>
+          <p>
+            Creemos firmemente en el ritual del afeitado a navaja, la toalla caliente y la conversación de calidad. Cada servicio incluye un diagnóstico personalizado adaptado a tus facciones, tipo de cabello y estilo de vida.
+          </p>
+        </div>
+        <div class="about-image">
+          <img src="img/hero.png" alt="Detalle del ritual de toalla caliente en BarberKing">
+        </div>
+      </div>
+    </div>
+  </section>
 
+  <!-- ====== EL EQUIPO (TEAM) ====== -->
+  <section class="team-section" id="team-section">
+    <div class="container">
+      <div class="team-header">
+        <p class="section-label">Especialistas</p>
+        <h2 class="section-title">Nuestros Barberos</h2>
+        <div class="gold-line" style="margin: var(--space-lg) auto;"></div>
+        <p style="color: var(--color-text-secondary);">
+          Un equipo de profesionales apasionados dedicados a perfeccionar tu imagen.
+        </p>
+      </div>
+      <div class="team-grid">
+        <div class="team-card">
+          <div class="team-avatar">
+            <span>🧔</span>
+          </div>
+          <h3 class="team-name">Carlos Martínez</h3>
+          <p class="team-role">Barbero Principal / Fundador</p>
+          <p class="team-bio">
+            Con más de 12 años de experiencia internacional, Carlos es especialista en cortes clásicos ingleses y el tradicional ritual de afeitado con navaja.
+          </p>
+        </div>
+        <div class="team-card">
+          <div class="team-avatar">
+            <span>💈</span>
+          </div>
+          <h3 class="team-name">Alejandro Ortiz</h3>
+          <p class="team-role">Estilista de Tendencias</p>
+          <p class="team-bio">
+            Apasionado de la cultura urbana, Alejandro es nuestro experto indiscutible en Degradados modernos (Fades), peinados texturizados y color capilar.
+          </p>
+        </div>
+        <div class="team-card">
+          <div class="team-avatar">
+            <span>✂️</span>
+          </div>
+          <h3 class="team-name">Sofía Ramos</h3>
+          <p class="team-role">Especialista en Barbas y Cuidado</p>
+          <p class="team-bio">
+            Sofía domina la alquimia de los aceites y bálsamos. Es experta en perfilado de barbas complejas, diseño de patillas y tratamientos capilares.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- ====== BOOKING ====== -->
   <section class="booking" id="booking-section">
@@ -207,6 +275,61 @@
           <button class="btn btn-primary" id="btn-next">
             Siguiente →
           </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== LOCALIZACIÓN Y HORARIOS ====== -->
+  <section class="location-section" id="location-section">
+    <div class="container">
+      <div class="location-grid">
+        <div class="location-info">
+          <p class="section-label">Contacto</p>
+          <h2 class="section-title">Dónde Encontrarnos</h2>
+          <div class="gold-line"></div>
+          <p style="color: var(--color-text-secondary); margin-bottom: var(--space-xl);">
+            Estamos ubicados en una zona céntrica y de fácil acceso. Ven a visitarnos y disfruta de un café premium o un whisky de cortesía mientras esperas tu turno.
+          </p>
+          
+          <div class="info-item">
+            <div class="info-icon">📍</div>
+            <div class="info-details">
+              <h4>Dirección</h4>
+              <p>Calle del Estilo, 45, Planta Baja — Madrid, España</p>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-icon">🕐</div>
+            <div class="info-details">
+              <h4>Horario de Apertura</h4>
+              <p>Lunes a Viernes: 09:00h - 13:30h y 16:00h - 20:30h</p>
+              <p>Sábados: 09:00h - 14:00h</p>
+              <p>Domingos: Cerrado</p>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-icon">📞</div>
+            <div class="info-details">
+              <h4>Teléfono y Correo</h4>
+              <p><a href="tel:+34912345678" style="color: var(--color-gold-primary);">+34 912 345 678</a></p>
+              <p>contacto@barberking.com</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="map-container">
+          <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3037.669868778906!2d-3.703790!3d40.416775!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDDCsDI1JzAwLjQiTiAzwrA0MicyMC44Ilc!5e0!3m2!1ses!2ses!4v1688400000000!5m2!1ses!2ses" 
+            width="100%" 
+            height="100%" 
+            style="border:0; filter: grayscale(1) invert(0.9) contrast(1.2);" 
+            allowfullscreen="" 
+            loading="lazy" 
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
         </div>
       </div>
     </div>
