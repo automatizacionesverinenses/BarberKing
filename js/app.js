@@ -103,7 +103,25 @@ document.addEventListener('DOMContentLoaded', () => {
   renderTimeSlots();
   setupEventListeners();
   setupScrollEffects();
+  setupNavbarAuth();
 });
+
+function setupNavbarAuth() {
+  const token = localStorage.getItem('bk_token');
+  const userStr = localStorage.getItem('bk_user');
+  const navLogin = document.getElementById('nav-login');
+
+  if (token && userStr && navLogin) {
+    try {
+      const user = JSON.parse(userStr);
+      const iconSvg = '<svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>';
+      navLogin.innerHTML = iconSvg + ' ' + ((user.role === 'admin' || user.role === 'employee') ? 'Panel Barbero' : 'Mi Perfil');
+      navLogin.href = (user.role === 'admin' || user.role === 'employee') ? 'admin.html' : '#';
+    } catch (e) {
+      console.error(e);
+    }
+  }
+}
 
 // ============================================
 // SERVICES RENDERING
@@ -267,7 +285,10 @@ function selectTime(time) {
 
 async function fetchBookedSlots(date) {
   try {
-    const response = await fetch(`${API_BASE}/booked-slots?date=${date}`);
+    const token = localStorage.getItem('bk_token');
+    const response = await fetch(`${API_BASE}/booked-slots?date=${date}`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
     const result = await response.json();
     if (result.success) {
       state.bookedSlots = result.data;
@@ -328,6 +349,9 @@ async function nextStep() {
   if (!validateStep(state.currentStep)) return;
 
   if (state.currentStep < 4) {
+    if (state.currentStep === 2) {
+      checkAuthForBooking();
+    }
     if (state.currentStep === 3) {
       // Submit booking to API
       const success = await submitBooking();
@@ -335,6 +359,30 @@ async function nextStep() {
     }
     state.currentStep++;
     updateStepUI();
+  }
+}
+
+function checkAuthForBooking() {
+  const token = localStorage.getItem('bk_token');
+  const authOverlay = document.getElementById('auth-overlay');
+  const userStr = localStorage.getItem('bk_user');
+
+  if (!token || !userStr) {
+    if(authOverlay) authOverlay.style.display = 'flex';
+  } else {
+    if(authOverlay) authOverlay.style.display = 'none';
+    try {
+      const user = JSON.parse(userStr);
+      const nameInput = document.getElementById('client-name');
+      const surnameInput = document.getElementById('client-surname');
+      const phoneInput = document.getElementById('client-phone');
+      const emailInput = document.getElementById('client-email');
+      
+      if (nameInput) nameInput.value = user.name || '';
+      if (surnameInput) surnameInput.value = user.surname || '';
+      if (phoneInput) phoneInput.value = user.phone || '';
+      if (emailInput) emailInput.value = user.email || '';
+    } catch(e) {}
   }
 }
 
@@ -419,261 +467,45 @@ async function submitBooking() {
   const btnNext = document.getElementById('btn-next');
   if (btnNext) {
     btnNext.disabled = true;
-// ============================================
-// APP LOGIC
-// ============================================
+    btnNext.textContent = 'Enviando...';
+  }
 
-document.addEventListener('DOMContentLoaded', () => {
-  setupNavbar();
-  setupBooking();
-  setupSmoothScroll();
-});
-
-function setupNavbar() {
-  const token = localStorage.getItem('bk_token');
-  const userStr = localStorage.getItem('bk_user');
-  const navLogin = document.getElementById('nav-login');
-
-  if (token && userStr && navLogin) {
-    try {
-      const user = JSON.parse(userStr);
-      navLogin.textContent = (user.role === 'admin' || user.role === 'employee') ? 'Panel Barbero' : 'Mi Perfil';
-      navLogin.href = (user.role === 'admin' || user.role === 'employee') ? 'admin.html' : '#';
-      // In a real app we would have a profile page for client
-    } catch (e) {
-      console.error(e);
+  const payload = {
+    service: state.selectedService,
+    date: state.selectedDate,
+    time: state.selectedTime,
+    client: {
+      name: document.getElementById('client-name')?.value.trim() || '',
+      surname: document.getElementById('client-surname')?.value.trim() || '',
+      phone: document.getElementById('client-phone')?.value.trim() || '',
+      email: document.getElementById('client-email')?.value.trim() || '',
+      notes: document.getElementById('client-notes')?.value.trim() || ''
     }
-  }
-
-  const toggle = document.getElementById('menu-toggle');
-  const nav = document.getElementById('nav-links');
-  
-  if (toggle && nav) {
-    toggle.addEventListener('click', () => {
-      nav.classList.toggle('active');
-    });
-  }
-}
-
-// ============================================
-// BOOKING FLOW
-// ============================================
-
-let currentStep = 1;
-const state = {
-  service: null,
-  date: null,
-  time: null,
-  client: null
-};
-
-function setupBooking() {
-  // Service selection
-  const serviceCards = document.querySelectorAll('.service-card');
-  serviceCards.forEach(card => {
-    card.addEventListener('click', () => {
-      // Check if logged in before proceeding
-      const token = localStorage.getItem('bk_token');
-      const authWarning = document.getElementById('auth-warning');
-      const bookingForm = document.getElementById('booking-client-form');
-      const userStr = localStorage.getItem('bk_user');
-
-      if (!token || !userStr) {
-        if(authWarning) authWarning.style.display = 'block';
-        if(bookingForm) bookingForm.style.display = 'none';
-      } else {
-        if(authWarning) authWarning.style.display = 'none';
-        if(bookingForm) {
-          bookingForm.style.display = 'block';
-          try {
-            const user = JSON.parse(userStr);
-            document.getElementById('client-name').value = user.name;
-            document.getElementById('client-surname').value = user.surname;
-            document.getElementById('client-phone').value = user.phone;
-          } catch(e) {}
-        }
-      }
-
-      serviceCards.forEach(c => c.classList.remove('selected'));
-      card.classList.add('selected');
-      
-      state.service = {
-        id: card.dataset.id,
-        name: card.dataset.name,
-        price: card.dataset.price,
-        duration: card.dataset.duration,
-        icon: card.querySelector('.service-icon').textContent
-      };
-      
-      goToStep(2);
-    });
-  });
-
-  // Date selection
-  const dateInput = document.getElementById('booking-date');
-  if (dateInput) {
-    const today = new Date();
-    dateInput.min = today.toISOString().split('T')[0];
-    
-    dateInput.addEventListener('change', async (e) => {
-      const selectedDate = e.target.value;
-      state.date = selectedDate;
-      await loadAvailableTimes(selectedDate);
-    });
-  }
-
-  // Time selection (delegated)
-  const timeGrid = document.getElementById('time-slots');
-  if (timeGrid) {
-    timeGrid.addEventListener('click', (e) => {
-      if (e.target.classList.contains('time-slot') && !e.target.classList.contains('disabled')) {
-        document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
-        e.target.classList.add('selected');
-        
-        state.time = e.target.dataset.time;
-        
-        // Render summary before going to step 3
-        renderSummary();
-        goToStep(3);
-      }
-    });
-  }
-
-  // Back buttons
-  document.querySelectorAll('.btn-back').forEach(btn => {
-    btn.addEventListener('click', () => {
-      goToStep(currentStep - 1);
-    });
-  });
-
-  // Next buttons
-  const btnNextStep2 = document.getElementById('btn-next-step-2');
-  if (btnNextStep2) {
-    btnNextStep2.addEventListener('click', () => {
-      if (!state.date || !state.time) {
-        showToast('error', 'Selecciona fecha y hora');
-        return;
-      }
-      renderSummary();
-      goToStep(3);
-    });
-  }
-
-  // Confirm Booking
-  const btnConfirm = document.getElementById('btn-confirm-booking');
-  if (btnConfirm) {
-    btnConfirm.addEventListener('click', submitBooking);
-  }
-}
-
-async function loadAvailableTimes(date) {
-  const timeGrid = document.getElementById('time-slots');
-  timeGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center;">Cargando horarios...</div>';
+  };
 
   try {
     const token = localStorage.getItem('bk_token');
-    const response = await fetch(`/api/booked-slots?date=${date}`, {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-    });
-    const result = await response.json();
-    
-    const bookedSlots = result.success ? result.data : [];
-    
-    const allSlots = ['10:00', '10:30', '11:00', '11:30', '12:00', '12:30', 
-                      '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00'];
-                      
-    timeGrid.innerHTML = allSlots.map(time => {
-      const isBooked = bookedSlots.includes(time);
-      const isSelected = state.time === time;
-      return `
-        <div class="time-slot ${isBooked ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" 
-             data-time="${time}">
-          ${time}
-        </div>
-      `;
-    }).join('');
-  } catch (err) {
-    timeGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: red;">Error al cargar horarios</div>';
-  }
-}
+    if (!token) return false;
 
-function renderSummary() {
-  const summaryEl = document.getElementById('booking-summary');
-  if (!summaryEl) return;
-
-  summaryEl.innerHTML = `
-    <h4 style="margin-bottom: var(--space-sm);">Resumen de la reserva</h4>
-    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 5px;">
-      <span>Servicio:</span>
-      <strong>${state.service?.icon} ${state.service?.name}</strong>
-    </div>
-    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 5px;">
-      <span>Fecha:</span>
-      <strong>${state.date}</strong>
-    </div>
-    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 5px;">
-      <span>Hora:</span>
-      <strong>${state.time}</strong>
-    </div>
-    <div style="display: flex; justify-content: space-between; margin-top: var(--space-md); font-size: 1.1rem; color: var(--color-gold-primary);">
-      <span>Total a pagar en local:</span>
-      <strong>${state.service?.price}€</strong>
-    </div>
-  `;
-}
-
-function goToStep(stepNumber) {
-  if (stepNumber < 1 || stepNumber > 4) return;
-  
-  // Update UI
-  document.querySelectorAll('.step-panel, .booking-step').forEach(panel => {
-    panel.classList.remove('active');
-    panel.style.display = 'none'; // Some are using inline styles for logic
-  });
-  
-  const targetStep = document.getElementById(`step-${stepNumber}`);
-  if (targetStep) {
-    targetStep.classList.add('active');
-    if (targetStep.style.display === 'none') {
-      targetStep.style.display = 'block'; // Ensure block display for our custom step 3
-    }
-  }
-
-  // Update Progress Bar
-  const steps = document.querySelectorAll('.progress-step');
-  steps.forEach((step, idx) => {
-    if (idx + 1 < stepNumber) {
-      step.classList.add('active');
-    } else if (idx + 1 === stepNumber) {
-      step.classList.add('active');
-    } else {
-      step.classList.remove('active');
-    }
-  });
-
-  currentStep = stepNumber;
-}
-
-async function submitBooking(e) {
-  e.preventDefault();
-  
-  const token = localStorage.getItem('bk_token');
-  if (!token) return;
-
-  const notes = document.getElementById('client-notes').value;
-
-  state.client = {
-    notes: notes
-  };
-
-  const btn = document.getElementById('btn-confirm-booking');
-  const originalText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = 'Procesando...';
-
-  try {
-    const response = await fetch('/api/appointments', {
+    const response = await fetch(`${API_BASE}/appointments`, {
       method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      showToast('error', result.error || result.errors?.join(', ') || 'Error al reservar la cita');
+      return false;
+    }
+
+    // Render confirmation
+    renderConfirmation(result.data);
+    showToast('success', '¡Cita reservada con éxito! El barbero ha sido notificado.');
     return true;
   } catch (err) {
     console.error('Error submitting booking:', err);

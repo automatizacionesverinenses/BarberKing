@@ -16,10 +16,13 @@
         <span class="logo-icon">✂</span>
         <span>BarberKing</span>
       </a>
-      <nav class="main-nav">
-        <a href="#services-section" class="nav-link">Servicios</a>
-        <a href="#booking-section" class="nav-link">Reservar Cita</a>
-        <a href="login.html" class="nav-link" id="nav-login">Iniciar Sesión</a>
+      <nav class="nav-links" id="nav-links">
+        <a href="#booking-section">Reservar</a>
+        <a href="login.html" id="nav-login" style="display: flex; align-items: center; gap: 5px;">
+          <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+          Identifícate / Regístrate
+        </a>
+        <a href="#booking-section" class="nav-cta">Reservar Cita</a>
       </nav>
       <div class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
         <span></span>
@@ -50,9 +53,6 @@
           <span class="btn-icon">📅</span>
           Reservar Ahora
         </a>
-        <a href="#services-section" class="btn btn-outline">
-          Ver Servicios
-        </a>
       </div>
       <div class="hero-stats">
         <div class="stat">
@@ -71,20 +71,7 @@
     </div>
   </section>
 
-  <!-- ====== SERVICES ====== -->
-  <section class="services" id="services-section">
-    <div class="container">
-      <div class="services-header">
-        <p class="section-label">Nuestros Servicios</p>
-        <h2 class="section-title">Elige tu Servicio</h2>
-        <div class="gold-line"></div>
-        <p class="section-subtitle">Selecciona el servicio que deseas para continuar con tu reserva</p>
-      </div>
-      <div class="services-grid" id="services-grid">
-        <!-- Populated by JS -->
-      </div>
-    </div>
-  </section>
+
 
   <!-- ====== BOOKING ====== -->
   <section class="booking" id="booking-section">
@@ -158,44 +145,42 @@
             </div>
           </div>
 
-          <!-- STEP 3: CLIENT DETAILS (Only shown if logged in) -->
-        <div class="booking-step" id="step-3" style="display: none;">
-          <h3 style="margin-bottom: var(--space-md);">Tus Datos (Sesión Iniciada)</h3>
-          
-          <div id="auth-warning" style="display: none; text-align: center; margin-bottom: var(--space-lg);">
-            <p style="color: var(--color-text-secondary); margin-bottom: var(--space-sm);">Para finalizar tu reserva, necesitas iniciar sesión o crear una cuenta gratuita.</p>
-            <a href="login.html" class="btn btn-primary" style="display: inline-block;">Iniciar Sesión / Registrarse</a>
-          </div>
-
-          <div id="booking-client-form">
-            <div style="display: flex; gap: var(--space-sm); margin-bottom: var(--space-sm);">
-              <div style="flex: 1;">
-                <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Nombre *</label>
-                <input type="text" id="client-name" readonly required style="width: 100%; padding: var(--space-sm); border: 1px solid var(--color-border); background: rgba(255,255,255,0.05); color: var(--color-text); border-radius: var(--radius-sm);">
-              </div>
-              <div style="flex: 1;">
-                <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Apellidos *</label>
-                <input type="text" id="client-surname" readonly required style="width: 100%; padding: var(--space-sm); border: 1px solid var(--color-border); background: rgba(255,255,255,0.05); color: var(--color-text); border-radius: var(--radius-sm);">
-              </div>
-            </div>
-
-            <div style="margin-bottom: var(--space-sm);">
-              <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Teléfono *</label>
-              <input type="tel" id="client-phone" readonly required style="width: 100%; padding: var(--space-sm); border: 1px solid var(--color-border); background: rgba(255,255,255,0.05); color: var(--color-text); border-radius: var(--radius-sm);">
-            </div>
+          <!-- Step 3: Contact Info -->
+          <div class="step-panel" id="step-3" style="position: relative;">
             
-            <div style="margin-bottom: var(--space-md);">
-              <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Notas para el barbero (Opcional)</label>
-              <textarea id="client-notes" rows="2" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--color-border); background: transparent; color: var(--color-text); border-radius: var(--radius-sm); font-family: inherit;"></textarea>
-            </div>
-            
-            <div class="booking-summary" id="booking-summary">
-              <!-- Summary injected by JS -->
+            <div id="auth-overlay" style="display: none; position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px; background: rgba(18, 18, 18, 0.85); backdrop-filter: blur(4px); z-index: 10; flex-direction: column; align-items: center; justify-content: center; border-radius: var(--radius-lg); text-align: center; padding: 20px;">
+              <svg style="width: 48px; height: 48px; color: var(--color-gold-primary); margin-bottom: 15px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z"></path></svg>
+              <h3 style="margin-bottom: 10px; color: var(--color-gold-primary); font-size: 1.5rem;">Inicia sesión para continuar</h3>
+              <p style="color: var(--color-text-secondary); margin-bottom: 20px;">Necesitas una cuenta para finalizar tu reserva. Así no tendrás que volver a introducir tus datos.</p>
+              <a href="login.html" class="btn btn-primary" style="text-decoration: none;">Identifícate / Regístrate</a>
             </div>
 
-            <button class="btn btn-primary" id="btn-confirm-booking" style="width: 100%; margin-top: var(--space-md);">Confirmar Reserva</button>
+            <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: var(--space-xl);">
+              📋 Completa tus Datos
+            </h3>
+            <form id="booking-form" class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="client-name">Nombre *</label>
+                <input type="text" class="form-input" id="client-name" placeholder="Tu nombre" readonly required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="client-surname">Apellido *</label>
+                <input type="text" class="form-input" id="client-surname" placeholder="Tu apellido" readonly required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="client-phone">Teléfono *</label>
+                <input type="tel" class="form-input" id="client-phone" placeholder="+34 612 345 678" readonly required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="client-email">Email</label>
+                <input type="email" class="form-input" id="client-email" placeholder="tu@email.com" readonly>
+              </div>
+              <div class="form-group full-width">
+                <label class="form-label" for="client-notes">Notas adicionales</label>
+                <textarea class="form-input" id="client-notes" placeholder="¿Alguna preferencia o petición especial?"></textarea>
+              </div>
+            </form>
           </div>
-        </div>
 
           <!-- Step 4: Confirmation -->
           <div class="step-panel" id="step-4">

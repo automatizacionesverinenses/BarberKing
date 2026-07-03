@@ -39,8 +39,10 @@
     }
 
     .auth-title {
-      font-size: 1.8rem;
+      font-size: 2rem;
       margin-bottom: var(--space-xs);
+      color: #a67c00; /* Darker gold */
+      font-weight: 800;
     }
 
     .auth-subtitle {
@@ -106,18 +108,22 @@
     .form-input {
       width: 100%;
       padding: var(--space-sm);
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--color-border);
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
       border-radius: var(--radius-sm);
-      color: var(--color-text);
+      color: #333333;
       font-family: inherit;
       transition: var(--transition-fast);
+    }
+
+    .form-input::placeholder {
+      color: #999999;
     }
 
     .form-input:focus {
       outline: none;
       border-color: var(--color-gold-primary);
-      background: rgba(255, 255, 255, 0.08);
+      background: #ffffff;
     }
 
     .btn-submit {
