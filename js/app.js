@@ -392,11 +392,35 @@ function checkAuthForBooking() {
   const userStr = localStorage.getItem('bk_user');
 
   if (!token || !userStr) {
-    if(authOverlay) authOverlay.style.display = 'flex';
+    if(authOverlay) {
+      authOverlay.innerHTML = `
+        <svg style="width: 48px; height: 48px; color: var(--color-gold-primary); margin-bottom: 15px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z"></path></svg>
+        <h3 style="margin-bottom: 10px; color: var(--color-gold-primary); font-size: 1.5rem;">Inicia sesión para continuar</h3>
+        <p style="color: var(--color-text-secondary); margin-bottom: 20px;">Necesitas una cuenta para finalizar tu reserva. Así no tendrás que volver a introducir tus datos.</p>
+        <a href="login.html" class="btn btn-primary" style="text-decoration: none;">Identifícate / Regístrate</a>
+      `;
+      authOverlay.style.display = 'flex';
+    }
   } else {
-    if(authOverlay) authOverlay.style.display = 'none';
     try {
       const user = JSON.parse(userStr);
+      if (!user.email_verified) {
+        if (authOverlay) {
+          authOverlay.innerHTML = `
+            <svg style="width: 48px; height: 48px; color: var(--color-accent-warning); margin-bottom: 15px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <h3 style="margin-bottom: 10px; color: var(--color-accent-warning); font-size: 1.5rem;">Verifica tu correo electrónico</h3>
+            <p style="color: var(--color-text-secondary); margin-bottom: 20px; max-width: 450px;">Hemos enviado un enlace de confirmación a <strong>${user.email}</strong>. Debes verificar tu correo para poder reservar citas.</p>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+              <button onclick="resendVerificationEmail('${user.email}')" class="btn btn-outline" style="cursor: pointer; padding: 10px 15px;">Reenviar Correo</button>
+              <button onclick="window.location.reload()" class="btn btn-primary" style="cursor: pointer; padding: 10px 15px;">Ya lo he verificado 🔄</button>
+            </div>
+          `;
+          authOverlay.style.display = 'flex';
+        }
+        return;
+      }
+
+      if(authOverlay) authOverlay.style.display = 'none';
       const nameInput = document.getElementById('client-name');
       const surnameInput = document.getElementById('client-surname');
       const phoneInput = document.getElementById('client-phone');
@@ -657,4 +681,22 @@ function formatDate(date) {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+async function resendVerificationEmail(email) {
+  try {
+    const response = await fetch(`${API_BASE}/auth/resend-verification`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await response.json();
+    if (data.success) {
+      showToast('success', '¡Correo de verificación reenviado!');
+    } else {
+      showToast('error', data.error || 'Error al reenviar el correo');
+    }
+  } catch (err) {
+    showToast('error', 'Error de conexión con el servidor');
+  }
 }

@@ -105,13 +105,13 @@ function setupForms() {
       const data = await response.json();
 
       if (data.success) {
-        localStorage.setItem('bk_token', data.token);
-        localStorage.setItem('bk_user', JSON.stringify(data.user));
-        
-        showToast('success', '¡Cuenta creada con éxito!');
+        showToast('success', data.message || '¡Cuenta creada! Revisa tu email para verificarla.');
         setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 1000);
+          const tabLogin = document.getElementById('tab-login');
+          if (tabLogin) tabLogin.click();
+          btn.disabled = false;
+          btn.textContent = 'Crear Cuenta';
+        }, 4000);
       } else {
         errorEl.textContent = data.error;
         errorEl.style.display = 'block';

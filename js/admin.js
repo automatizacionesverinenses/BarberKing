@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadAppointments();
   setupAdminEvents();
   connectSSE();
+  checkGoogleCalendarStatus();
 });
 
 // ============================================
@@ -464,4 +465,73 @@ function showToast(type, message) {
       setTimeout(() => toast.remove(), 300);
     }
   }, 4000);
+}
+
+// ============================================
+// GOOGLE CALENDAR ACTIONS
+// ============================================
+async function checkGoogleCalendarStatus() {
+  const btn = document.getElementById('btn-google-calendar');
+  if (!btn) return;
+  
+  try {
+    const token = localStorage.getItem('bk_token');
+    const res = await fetch(`${API_BASE}/auth/google/status`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    
+    if (data.success) {
+      if (data.connected) {
+        btn.innerHTML = '📅 Calendario Conectado';
+        btn.style.borderColor = 'var(--color-accent-warning)';
+        btn.style.color = 'var(--color-accent-warning)';
+        btn.onclick = disconnectGoogleCalendar;
+      } else {
+        btn.innerHTML = '📅 Conectar Calendario';
+        btn.style.borderColor = '';
+        btn.style.color = '';
+        btn.onclick = connectGoogleCalendar;
+      }
+    }
+  } catch (err) {
+    console.error('Error al comprobar estado de Google Calendar:', err);
+  }
+}
+
+async function connectGoogleCalendar() {
+  const token = localStorage.getItem('bk_token');
+  try {
+    const res = await fetch(`${API_BASE}/auth/google`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.success && data.url) {
+      window.location.href = data.url;
+    } else {
+      showToast('error', data.error || 'Error al iniciar conexión');
+    }
+  } catch (err) {
+    showToast('error', 'Error de conexión');
+  }
+}
+
+async function disconnectGoogleCalendar() {
+  if (!confirm('¿Seguro que quieres desconectar Google Calendar? Las nuevas citas ya no se sincronizarán.')) return;
+  const token = localStorage.getItem('bk_token');
+  try {
+    const res = await fetch(`${API_BASE}/auth/google/disconnect`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('success', 'Google Calendar desconectado');
+      checkGoogleCalendarStatus();
+    } else {
+      showToast('error', data.error || 'Error al desconectar');
+    }
+  } catch (err) {
+    showToast('error', 'Error de conexión');
+  }
 }
