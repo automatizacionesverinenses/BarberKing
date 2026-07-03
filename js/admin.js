@@ -72,7 +72,7 @@ function connectSSE() {
 
   eventSource.addEventListener('new_appointment', (e) => {
     const data = JSON.parse(e.data);
-    showToast('success', `🔔 ${data.message}`);
+    showToast('success', data.message);
     playNotificationSound();
     loadStats();
     loadAppointments();
@@ -80,7 +80,7 @@ function connectSSE() {
 
   eventSource.addEventListener('status_update', (e) => {
     const data = JSON.parse(e.data);
-    showToast('success', `🔄 ${data.message}`);
+    showToast('success', data.message);
     loadStats();
     loadAppointments();
   });
@@ -254,13 +254,13 @@ async function loadAppointments(filter = currentFilter) {
           <td>
             <div class="action-btns">
               ${apt.status === 'pending' ? `
-                <button class="action-btn confirm" title="Confirmar cita" data-action="confirm" data-id="${apt.id}" aria-label="Confirmar cita">✓</button>
-                <button class="action-btn cancel" title="Cancelar cita" data-action="cancel" data-id="${apt.id}" aria-label="Cancelar cita">✕</button>
+                <button class="action-btn confirm" title="Confirmar cita" data-action="confirm" data-id="${apt.id}" aria-label="Confirmar cita"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>
+                <button class="action-btn cancel" title="Cancelar cita" data-action="cancel" data-id="${apt.id}" aria-label="Cancelar cita"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
               ` : ''}
               ${apt.status === 'confirmed' ? `
-                <button class="action-btn cancel" title="Cancelar cita" data-action="cancel" data-id="${apt.id}" aria-label="Cancelar cita">✕</button>
+                <button class="action-btn cancel" title="Cancelar cita" data-action="cancel" data-id="${apt.id}" aria-label="Cancelar cita"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
               ` : ''}
-              <button class="action-btn" title="Ver detalles" data-action="details" data-id="${apt.id}" aria-label="Ver detalles">👁</button>
+              <button class="action-btn" title="Ver detalles" data-action="details" data-id="${apt.id}" aria-label="Ver detalles"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
             </div>
           </td>
         </tr>
@@ -350,19 +350,19 @@ async function showDetails(id) {
     });
 
     const statusLabels = {
-      pending: '⏳ Pendiente',
-      confirmed: '✅ Confirmada',
-      cancelled: '❌ Cancelada'
+      pending: 'Pendiente',
+      confirmed: 'Confirmada',
+      cancelled: 'Cancelada'
     };
 
     const details = [
-      `📋 DETALLES DE LA CITA`,
+      `DETALLES DE LA CITA`,
       `──────────────────────────`,
       `Cliente: ${apt.client?.name} ${apt.client?.surname}`,
       `Teléfono: ${apt.client?.phone}`,
       `Email: ${apt.client?.email || 'No proporcionado'}`,
       ``,
-      `Servicio: ${apt.service?.icon} ${apt.service?.name}`,
+      `Servicio: ${apt.service?.name}`,
       `Fecha: ${formattedDate}`,
       `Hora: ${apt.time}h`,
       `Duración: ${apt.service?.duration} min`,
@@ -425,12 +425,12 @@ function setupAdminEvents() {
   if (refreshBtn) {
     refreshBtn.addEventListener('click', async () => {
       refreshBtn.disabled = true;
-      refreshBtn.textContent = '⏳ Cargando...';
+      refreshBtn.textContent = 'Cargando...';
       await loadStats();
       await loadAppointments(currentFilter);
       showToast('success', 'Datos actualizados');
       refreshBtn.disabled = false;
-      refreshBtn.textContent = '🔄 Refrescar';
+      refreshBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: -2px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Refrescar';
     });
   }
 }
@@ -445,12 +445,15 @@ function showToast(type, message) {
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
 
-  const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+  const svgSuccess = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+  const svgError = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+  const svgInfo = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+  const icon = type === 'success' ? svgSuccess : type === 'error' ? svgError : svgInfo;
 
   toast.innerHTML = `
     <span class="toast-icon">${icon}</span>
     <span class="toast-message">${message}</span>
-    <span class="toast-close" role="button" aria-label="Cerrar">✕</span>
+    <span class="toast-close" role="button" aria-label="Cerrar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
   `;
 
   container.appendChild(toast);
@@ -483,14 +486,14 @@ async function checkGoogleCalendarStatus() {
     
     if (data.success) {
       if (data.connected) {
-        btn.innerHTML = '📅 Calendario Conectado';
-        btn.style.borderColor = 'var(--color-accent-warning)';
-        btn.style.color = 'var(--color-accent-warning)';
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: -2px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Calendario Conectado';
+        btn.style.borderColor = 'var(--color-accent-success)';
+        btn.style.color = 'var(--color-accent-success)';
         btn.onclick = disconnectGoogleCalendar;
       } else {
-        btn.innerHTML = '📅 Conectar Calendario';
-        btn.style.borderColor = '';
-        btn.style.color = '';
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: -2px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Conectar Calendario';
+        btn.style.borderColor = 'var(--color-border)';
+        btn.style.color = 'var(--color-text-primary)';
         btn.onclick = connectGoogleCalendar;
       }
     }
